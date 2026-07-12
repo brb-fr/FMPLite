@@ -239,15 +239,6 @@
             filter: blur(42px);
             opacity: 0.8;
         }
-        #backSearch {
-            position:absolute;
-            top: 0;
-            left: 0;
-            z-index: 9;
-            transform: scale(1.4);
-            margin-top: 24px;
-            margin-left: 24px;
-        }
         .homeTitle {
             font-size: 28px;
             font-weight: 650;
@@ -319,7 +310,7 @@
 </head>
 <body>
     <div class="topBar">
-
+        
     </div>
     <div class="container" id="homeWindow"style="display: none; transform: translateX(100vw);">
         <div id="lastPlayed">
@@ -333,7 +324,6 @@
         </div>
     </div>
     <div class="container" id="searchWindow" >
-        <svg xmlns="http://www.w3.org/2000/svg" id="backSearch" height="24px" viewBox="0 -960 960 960" style="display: none; transform: translateX(100vw);"width="24px" fill="#FFFFFF"><path d="m326.15-434.5 218.74 218.74L480-151.87 151.87-480 480-808.13l64.89 63.89L326.15-525.5h481.98v91H326.15Z"/></svg>
         <div class="top">
             <input id="songSearch" type="input" enterkeyhint="search" inputmode="search" placeholder="Search for any song">
         </div>

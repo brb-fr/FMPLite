@@ -402,7 +402,7 @@
                 <h4 id="title" style="display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; max-width: 56vw ;margin: 0; padding: 0; margin-top: 2px;">Nothing...</h4>
                 <p id="other"style="margin: 0; margin-top: 2px; padding: 0; color: rgb(160,160,160); font-weight: 500; font-size: 12px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50vw"></p>
             </div>
-            <input type="range" id="progress" min="0" max="100" value="50"></input>
+            <input type="range" id="progress" min="0" max="100" value="0"></input>
             <div id="pauseResume" tabindex="-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"  id="pauseResumeIcon" fill="#FFFFFF"><path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/></svg>
             </div>
@@ -412,6 +412,7 @@
         </div>
     </div>
     <script>
+        let maximized = false
         let ua = window.navigator.userAgent
         if(/safari/i.test(ua)&&!/chrome|crios|edg/i.test(ua)){
             document.getElementById("blurBg").style.display = "none"
@@ -489,18 +490,23 @@
             loadLastPlayed()
         }
         document.getElementById("home").onclick = () => {
+            if(maximized){return}
             document.getElementById("homeWindow").style.display = ""
             document.getElementById("searchWindow").style.display = "none"
             document.getElementById("home").classList.add("active")
             document.getElementById("search").classList.remove("active")
+            document.getElementById("songSearch").blur()
         }
         document.getElementById("search").onclick = () => {
+            if(maximized){return}
             document.getElementById("homeWindow").style.display = "none"
             document.getElementById("searchWindow").style.display = ""
             document.getElementById("home").classList.remove("active")
             document.getElementById("search").classList.add("active")
+            setTimeout(() => {document.getElementById("songSearch").focus()}, 300)
         }
         document.getElementById("cSongItems").onclick = () => {
+            maximized = true
             document.getElementById("cSong").style.animation = "0.6s ease expandPlayer forwards"
             let div = document.getElementById("cSongItems")
             div.classList.add("expanded-player")
@@ -514,6 +520,7 @@
         }
         document.getElementById("hide").onclick = (e) => {
             e.stopPropagation()
+            maximized = false
             document.getElementById("cSong").style.animation = "0.6s ease minimizePlayer forwards"
             let div = document.getElementById("cSongItems")
             let info = div.querySelector(".info")

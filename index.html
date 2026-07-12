@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta name="description" content="Listen to music on the web." />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181818" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
+    <meta property="og:title" content="FMPLite">
+    <meta property="og:description" content="Listen to music on the web.">
+    <meta property="og:image" content="/assets/icons/192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="FMPLite" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+    <link rel="icon" href="/assets/icons/192x192.png" type="image/png" />
+    <link rel="manifest" href="manifest.json" />
+    <title>FMPLite</title>
+    <style>
+        * {
+            user-select: none;
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+        body {
+            touch-action: none;
+            background-color: #111111;
+            font-family: sans-serif;
+            color: white;
+            overflow-x: hidden;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 60px;
+            max-height: 100vh;
+            margin-left: 1px;
+        }
+        img {
+            touch-action: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+            -webkit-touch-callout: none;
+        }
+        .container {
+            width: 850px;
+        }
+        input[type="input"]{
+            background-color: #111111;
+            border: 2px solid rgba(84, 84, 84, 0.35);
+            font-size: 20px;
+            font-weight: 550;
+            color: white;
+            text-align: center;
+            width: 80%;
+            border-radius: 12px;
+            padding: 10px 5px 10px 5px;
+        }
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+        }
+        .songs {
+            margin-top: 50px;
+            max-width: 100%;
+            max-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            gap: 5px;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+        #song {
+            width: 98%;
+            display: none;
+            border: 2px solid rgba(84, 84, 84, 0.35);
+            border-radius: 8px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            transition: all 0.1s ease;
+        }
+        #song:hover {
+            background-color: #252525;
+        }
+        #pauseResume {
+            position: absolute;
+            right: 0;
+            margin-right: 12px;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .cSong {
+            display: flex;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            width: 93vw;
+            background-color: #161616;
+            border: 3px rgba(84, 84, 84, 0.35) solid;
+            border-bottom: 0;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            padding: 0;
+            margin-left: -1px;
+            height: 65px;
+            transform: translateY(100%);
+            z-index: 10;
+            overflow: hidden;
+            transition: 0.6s all ease-out
+        }
+        #cSongItems #img, #cSongItems .info, #cSongItems #title, #cSongItems #pauseResume {
+            transition: all 0.5s ease-out;
+        }
+        .cSong.expanded-player {
+            background-color: #111111;
+        }
+        .minimize {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            margin-right: 13px;
+            margin-top: 12px;
+            transform: scale(1.4);
+        }
+        .cSongItems .info {
+            position: absolute;
+            left: 66px;
+            height: 54px;
+            text-shadow: 0 1px 1px #0c0c0cb0;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .expanded-player .info {
+            left: 50%;
+            bottom:41.5%;
+            transform: translateX(-50%);
+            align-items: center;
+        }
+        .cSongItems.expanded-player {
+            flex-direction: column;
+            justify-content: center;
+            min-width: 100%;
+            min-height: 100%;
+            gap: 10px;
+            margin: 0
+        }
+        .cSongItems #img {
+            object-fit: cover;
+            border-radius: 8px;
+            width: 50px;
+            z-index: 2;
+            height: 50px;
+            position: absolute;
+            left: 8px
+        }
+        .expanded-player #img {
+            transform: translateX(-50%);
+            width: 160px;
+            height: 160px;
+            left: 50%;
+            bottom: 50%;
+            margin: 0
+        }
+        .cSongItems #pauseResume {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            right: 5px;
+            border-radius: 50%;
+            height: 32px;
+            width: 32px
+        }
+        .expanded-player #pauseResume {
+            margin: 0;
+            transform: translateX(50%);
+            width: 48px;
+            height: 48px;
+            bottom: 23%;
+            right: 50%;
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+        .cSongItems {
+            display: flex;
+            align-items: center;
+            height: 50px;
+            width: 75%;
+            overflow: hidden;
+            margin-left: 3px;
+        }
+        #progress {
+            display:none;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 20px;
+            border: 2px #ececec42 solid;
+            opacity: 0.8;
+            overflow: hidden;
+            background: linear-gradient(to right, #ececec7c 0%, #ececec7c var(--p, 0%), #86868617 var(--p, 0%), #86868617 100%); 
+        }
+        #progress::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            background-color:transparent;
+        }
+        .expanded-player #progress {
+            display: block;
+            position: absolute;
+            bottom: 36%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0;
+            padding: 0;
+            width: 70%;
+            height: 12px;
+        }
+        #blurBg {
+            object-fit: cover;
+            min-width: 100vw;
+            min-height: 100vh;
+            filter: blur(42px);
+            opacity: 0.8;
+        }
+        #backSearch {
+            position:absolute;
+            top: 0;
+            left: 0;
+            z-index: 9;
+            transform: scale(1.4);
+            margin-top: 24px;
+            margin-left: 24px;
+        }
+        .homeTitle {
+            font-size: 28px;
+            font-weight: 650;
+        }
+        .homeDiv {
+            display: flex;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            max-width: 100%;
+            height: 140px;
+            margin-left: 3px;
+            padding: 10px;
+            gap: 5px;
+        }
+        .divItem {
+            padding: 10px;
+            border: 3px solid rgb(120, 120, 120, 0.125);
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 80%;
+            }
+            #blurBg {
+                min-width: auto;
+                min-height: auto;
+                width: 100%;
+                height: 100%;
+            }
+        }
+        @keyframes play {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+        @keyframes expandPlayer {
+            from {
+                transform: translateY(0);
+                height: 65px;
+                width: 93vw;
+            }
+            to {
+                transform: translateY(0);
+                height: 92vh;
+                width: 97.5vw;
+            }
+        }
+        @keyframes minimizePlayer {
+            to {
+                transform: translateY(0);
+                height: 65px;
+                width: 93vw;
+            }
+            from {
+                transform: translateY(0);
+                height: 92vh;
+                width: 97.5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="topBar">
+
+    </div>
+    <div class="container" id="homeWindow"style="display: none; transform: translateX(100vw);">
+        <div id="lastPlayed">
+            <h1 class="homeTitle">Last played</h1>
+            <div class="homeDiv" id="lastPlayedDiv">
+                <div class="divItem" id="lastPlayedSong">
+                    <img src="" id="img" width="90px" height="90px" draggable="false" id="img" style="object-fit: cover; border-radius: 8px" src="" alt="Song thumbnail"alt="Song Icon">
+                    <h4 id="title" style="text-align: center; margin: 0; padding: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90px;">example</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="searchWindow" >
+        <svg xmlns="http://www.w3.org/2000/svg" id="backSearch" height="24px" viewBox="0 -960 960 960" style="display: none; transform: translateX(100vw);"width="24px" fill="#FFFFFF"><path d="m326.15-434.5 218.74 218.74L480-151.87 151.87-480 480-808.13l64.89 63.89L326.15-525.5h481.98v91H326.15Z"/></svg>
+        <div class="top">
+            <input id="songSearch" type="input" enterkeyhint="search" inputmode="search" placeholder="Search for any song">
+        </div>
+        <div id="songs" class="songs">
+            <div id="song">
+                <img draggable="false" id="img" style="border-radius: 8px; margin-left: 5px; object-fit: cover;" src="" width="56px" height="56px" alt="Song thumbnail">
+                <div class="info" style="margin-left: 15px; height: 54px; display: flex; justify-content: center;flex-direction: column;">
+                    <h4 id="title" style="display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; max-width: 52vw ;margin: 0; padding: 0; margin-top: 2px;"></h4>
+                    <p id="other"style="margin: 0; margin-top: 2px;padding: 0; color: rgb(120,120,120); font-weight: 500; font-size: 12px;">info</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="cSong" id="cSong" style="backdrop-filter: blur(14px);">
+        <img id="blurBg"src="">
+        <div class="cSongItems" id="cSongItems">
+            <img draggable="false" id="img" src="">
+            <div class="info">
+                <h4 id="title" style="display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; max-width: 56vw ;margin: 0; padding: 0; margin-top: 2px;">Nothing...</h4>
+                <p id="other"style="margin: 0; margin-top: 2px; padding: 0; color: rgb(160,160,160); font-weight: 500; font-size: 12px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50vw"></p>
+            </div>
+            <input type="range" id="progress" min="0" max="100" value="50"></input>
+            <div id="pauseResume" tabindex="-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"  id="pauseResumeIcon" fill="#FFFFFF"><path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/></svg>
+            </div>
+            <div class="minimize" id="hide" style="display: none">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#FFFFFF"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>
+            </div>
+        </div>
+    </div>
+    <script>
+        let ua = window.navigator.userAgent
+        if(/safari/i.test(ua)&&!/chrome|crios|edg/i.test(ua)){
+            document.getElementById("blurBg").style.display = "none"
+            document.getElementById("blurBg").style.filter = "none"
+            document.getElementById("cSong").style.opacity = "1"
+            document.getElementById("cSong").style.backdropFilter = "none"
+        }
+        let musicPlayer = new Audio()
+        let opened = false
+        const lastPlayedItemClone = document.getElementById("lastPlayedSong").cloneNode(true)
+        function loadLastPlayed() {
+            let songs = JSON.parse(localStorage.getItem("lastPlayed"))
+            document.getElementById("lastPlayedDiv").innerHTML = ''
+            songs.forEach(song => {
+                let clone = lastPlayedItemClone.cloneNode(true)
+                clone.querySelector("#img").src = song.thumbnail
+                clone.querySelector("#title").textContent = song.title
+                clone.style.display = "flex"
+                clone.onclick = () => {
+                    fetch("/get?id="+song.id)
+                        .then(r => r.json())
+                        .then(r => {
+                            playSong(r.path, song.title, r.img, song.id, r.color, song.uploader)
+                            let lastPlayed = [...songs]
+                            lastPlayed.filter(item => item.id !== song.id)
+                            lastPlayed.unshift(song)
+                            if(lastPlayed.length>15) {lastPlayed.pop()}
+                            localStorage.setItem("lastPlayed", JSON.stringify(lastPlayed))
+                            loadLastPlayed()
+                        })
+                }
+                document.getElementById("lastPlayedDiv").append(clone)
+            })
+        }
+        let prog = document.getElementById("progress")
+        function syncProg(){
+            let val = prog.value
+            prog.style.setProperty("--p", `${val}%`) 
+        }
+        prog.addEventListener("input", syncProg)
+        prog.addEventListener("change", () => {musicPlayer.currentTime = (prog.value * musicPlayer.duration)/100})
+
+        musicPlayer.addEventListener("timeupdate", () => {
+            prog.value = (musicPlayer.currentTime / musicPlayer.duration) * 100
+            syncProg()
+        })
+        function playSong(path, songName, artwork, id, color, uploader) {
+            musicPlayer.src = path
+            musicPlayer.play()
+            if(!opened){
+                document.getElementById("cSong").style.animation = "0.4s ease play forwards"
+                opened = true
+            }
+            let songBar = document.getElementById("cSong").querySelector(".cSongItems")
+            if(/safari/i.test(ua)&&!/chrome|crios|edg/i.test(ua)){
+                document.getElementById("cSong").style.backgroundColor = `color-mix(in srgb, #${color} 30%, black)`
+            }
+            else {
+                document.getElementById("cSong").style.backgroundColor = `color-mix(in srgb, #${color}C9 60%, black)`
+            }
+            document.getElementById("blurBg").src = artwork
+            songBar.querySelector("#img").src = artwork
+            let textInfo = songBar.querySelector(".info")
+            textInfo.querySelector("#title").textContent = songName
+            textInfo.querySelector("#other").textContent = id
+            if ("mediaSession" in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    "title": songName,
+                    "artwork": [{
+                        src: artwork, sizes: "512x512", type: "image/jpeg"
+                    }]
+                })
+            }
+        }
+        if(localStorage.getItem("lastPlayed") != null) {
+            loadLastPlayed()
+        }
+        document.getElementById("cSongItems").onclick = () => {
+            document.getElementById("cSong").style.animation = "0.6s ease expandPlayer forwards"
+            let div = document.getElementById("cSongItems")
+            div.classList.add("expanded-player")
+            document.getElementById("cSong").classList.add("expanded-player")
+            let info = div.querySelector(".info")
+            let title = info.querySelector("#title")
+            let hide = div.querySelector(".minimize")
+            hide.style.display = "block"
+            title.style.fontSize = "22px"
+            title.style.maxWidth = "70vw"
+        }
+        document.getElementById("hide").onclick = (e) => {
+            e.stopPropagation()
+            document.getElementById("cSong").style.animation = "0.6s ease minimizePlayer forwards"
+            let div = document.getElementById("cSongItems")
+            let info = div.querySelector(".info")
+            let title = info.querySelector("#title")
+            let hide = div.querySelector(".minimize")
+            document.getElementById("cSong").classList.remove("expanded-player")
+            hide.style.display = "none"
+            title.style.fontSize = "14px"
+            title.style.maxWidth = "56vw"
+            setTimeout(()=>{
+                div.classList.remove("expanded-player")
+            }, 75)
+        }
+        document.getElementById("pauseResume").onclick = (e) => {
+            musicPlayer.paused = !musicPlayer.paused
+            e.stopPropagation()
+            if (musicPlayer.paused){
+                musicPlayer.play()
+                document.getElementById("pauseResumeIcon").innerHTML = '<path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/>'            
+            }
+            else {
+                musicPlayer.pause()
+                document.getElementById("pauseResumeIcon").innerHTML = '<path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z"/>'
+            }
+        }
+        musicPlayer.onpause = () => {
+            document.getElementById("pauseResumeIcon").innerHTML = '<path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z"/>'
+        }
+        musicPlayer.onplay = () => {
+            document.getElementById("pauseResumeIcon").innerHTML = '<path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/>'    
+        }
+        const cloneS = document.getElementById("song").cloneNode(true)
+        const songSearch = document.getElementById("songSearch")
+        songSearch.onkeydown = (e) => {
+            if (e.key == "Enter") {
+                songSearch.blur()
+                e.preventDefault()
+                fetch("/search?q="+encodeURIComponent(songSearch.value.trimEnd()))
+                    .then(r => r.json())
+                    .then(r => {
+                        document.getElementById("songs").innerHTML = ''
+                        r.songs.forEach(song => {
+                            let clone = cloneS.cloneNode(true)
+                            clone.style.display = "flex"
+                            clone.querySelector("#img").contextmenu = (e) => e.preventDefault()
+                            clone.querySelector("#img").src = song.thumbnail
+                            let textInfo = clone.querySelector(".info")
+                            textInfo.querySelector("#other").textContent = song.id
+                            textInfo.querySelector("#title").textContent = song.title
+                            document.getElementById("songs").appendChild(clone)
+                            clone.onclick = () => {
+                                fetch("/get?id="+song.id)
+                                    .then(r => r.json())
+                                    .then(r => {
+                                        playSong(r.path, song.title, r.img, song.id, r.color, song.uploader)
+                                        let lastPlayed = []
+                                        if(localStorage.getItem("lastPlayed") != null){
+                                            lastPlayed = JSON.parse(localStorage.getItem("lastPlayed"))
+                                            lastPlayed.filter(item => item.id !== song.id)
+                                            lastPlayed.unshift(song)
+                                            if(lastPlayed.length>15) {lastPlayed.pop()}
+                                        } else{
+                                            lastPlayed = [song]
+                                        }
+                                        localStorage.setItem("lastPlayed", JSON.stringify(lastPlayed))
+                                        loadLastPlayed()
+                                    })
+                            }
+                        });
+                    })
+            }
+        }
+    </script>
+</body>
+</html>

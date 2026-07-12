@@ -59,6 +59,7 @@
             padding: 10px 5px 10px 5px;
         }
         .top {
+            margin-top: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -239,6 +240,51 @@
             filter: blur(42px);
             opacity: 0.8;
         }
+        .topBar {
+            position: fixed;
+            top: 0;
+            width: 97.5%;
+            padding: 15px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .appInfo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 10px;
+        }
+        .navItems {
+            position: absolute;
+            right: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 150px;
+            padding-right: 10px;
+        }
+        .topBtn {
+            border: none;
+            background-color: #61616117;
+            border: 1px #61616118;
+            color: #aaaaaa;
+            border-radius: 35px;
+            width: 60px;
+            height: 25px;
+            display: flex;
+            font-weight: 550;
+            justify-content: center;
+            align-items: center;
+            transition: all ease 0.2s;
+            padding: 2px 4px;
+            cursor: pointer;
+        }
+        .topBtn.active {
+            background-color: #86868633;
+            color: white;
+        }
         .homeTitle {
             font-size: 28px;
             font-weight: 650;
@@ -310,9 +356,20 @@
 </head>
 <body>
     <div class="topBar">
-        
+        <div class="appInfo">
+            <img src="/assets/icons/192x192.png" alt="" width="30px" height="30px">
+            <h3 style="font-weight: 650; font-size: 13px; padding: 0; margin: 0;">FMPLite</h3>
+        </div>
+        <div class="navItems">
+            <button id="home" class="topBtn active">
+                Home
+            </button>
+            <button id="search" class="topBtn">
+                Search
+            </button>
+        </div>
     </div>
-    <div class="container" id="homeWindow"style="display: none; transform: translateX(100vw);">
+    <div class="container" id="homeWindow">
         <div id="lastPlayed">
             <h1 class="homeTitle">Last played</h1>
             <div class="homeDiv" id="lastPlayedDiv">
@@ -323,7 +380,7 @@
             </div>
         </div>
     </div>
-    <div class="container" id="searchWindow" >
+    <div class="container" id="searchWindow" style="display: none">
         <div class="top">
             <input id="songSearch" type="input" enterkeyhint="search" inputmode="search" placeholder="Search for any song">
         </div>
@@ -379,7 +436,7 @@
                         .then(r => {
                             playSong(r.path, song.title, r.img, song.id, r.color, song.uploader)
                             let lastPlayed = [...songs]
-                            lastPlayed.filter(item => item.id !== song.id)
+                            lastPlayed = lastPlayed.filter(item => item.id !== song.id)
                             lastPlayed.unshift(song)
                             if(lastPlayed.length>15) {lastPlayed.pop()}
                             localStorage.setItem("lastPlayed", JSON.stringify(lastPlayed))
@@ -396,7 +453,6 @@
         }
         prog.addEventListener("input", syncProg)
         prog.addEventListener("change", () => {musicPlayer.currentTime = (prog.value * musicPlayer.duration)/100})
-
         musicPlayer.addEventListener("timeupdate", () => {
             prog.value = (musicPlayer.currentTime / musicPlayer.duration) * 100
             syncProg()
@@ -431,6 +487,18 @@
         }
         if(localStorage.getItem("lastPlayed") != null) {
             loadLastPlayed()
+        }
+        document.getElementById("home").onclick = () => {
+            document.getElementById("homeWindow").style.display = ""
+            document.getElementById("searchWindow").style.display = "none"
+            document.getElementById("home").classList.add("active")
+            document.getElementById("search").classList.remove("active")
+        }
+        document.getElementById("search").onclick = () => {
+            document.getElementById("homeWindow").style.display = "none"
+            document.getElementById("searchWindow").style.display = ""
+            document.getElementById("home").classList.remove("active")
+            document.getElementById("search").classList.add("active")
         }
         document.getElementById("cSongItems").onclick = () => {
             document.getElementById("cSong").style.animation = "0.6s ease expandPlayer forwards"
@@ -504,7 +572,7 @@
                                         let lastPlayed = []
                                         if(localStorage.getItem("lastPlayed") != null){
                                             lastPlayed = JSON.parse(localStorage.getItem("lastPlayed"))
-                                            lastPlayed.filter(item => item.id !== song.id)
+                                            lastPlayed = lastPlayed.filter(item => item.id !== song.id)
                                             lastPlayed.unshift(song)
                                             if(lastPlayed.length>15) {lastPlayed.pop()}
                                         } else{

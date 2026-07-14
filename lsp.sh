@@ -1,0 +1,1 @@
+~/Downloads/Godot.64 --path ~/Projects/FMPLite --no-window --editor --lsp-port 6008
